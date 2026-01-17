@@ -1,0 +1,113 @@
+name: Deploy CRM to GitHub Pages
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create static CRM files
+        run: |
+          mkdir -p public
+          cat > public/index.html << 'EOF'
+          <!doctype html>
+          <html lang="ru">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <title>DolomitPulse CRM</title>
+            <link rel="stylesheet" href="styles.css" />
+          </head>
+          <body>
+            <header class="topbar">
+              <div class="brand" id="brandTitle">DolomitPulse CRM</div>
+              <div class="topbar-actions">
+                <select id="lang">
+                  <option value="ru">RU</option>
+                  <option value="en">EN</option>
+                </select>
+              </div>
+            </header>
+
+            <nav class="tabs">
+              <button class="tab active" data-tab="leads" id="tabLeads">Лиды</button>
+              <button class="tab" data-tab="deals" id="tabDeals">Сделки</button>
+              <button class="tab" data-tab="lots" id="tabLots">Партии</button>
+              <button class="tab" data-tab="monitor" id="tabMonitor">Мониторинг</button>
+              <button class="tab" data-tab="settings" id="tabSettings">Настройки</button>
+            </nav>
+
+            <main class="container">
+              <section id="view"></section>
+            </main>
+
+            <script src="app.js"></script>
+            <script>
+              if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+            </script>
+          </body>
+          </html>
+          EOF
+
+          cat > public/styles.css << 'EOF'
+          :root{
+            --bg:#0b0f19;
+            --card:#121a2a;
+            --text:#e8eefc;
+            --muted:#a9b7d0;
+            --primary:#f5c400;
+            --border:rgba(255,255,255,.08);
+          }
+          *{box-sizing:border-box}
+          body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+          .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10}
+          .brand{font-weight:800}
+          .tabs{display:flex;gap:8px;padding:10px 12px;overflow:auto;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:52px;z-index:9}
+          .tab{border:1px solid var(--border);background:transparent;color:var(--text);padding:8px 12px;border-radius:12px;white-space:nowrap}
+          .tab.active{background:var(--primary);color:#111;border-color:transparent;font-weight:700}
+          .container{padding:12px;max-width:980px;margin:0 auto}
+          .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;margin:10px 0}
+          .row{display:flex;gap:10px;flex-wrap:wrap}
+          .field{display:flex;flex-direction:column;gap:6px;min-width:220px;flex:1}
+          label{color:var(--muted);font-size:12px}
+          input,select,textarea{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:12px;outline:none}
+          textarea{min-height:88px}
+          .btn{border:0;border-radius:12px;padding:10px 12px;font-weight:700}
+          .btn-primary{background:var(--primary);color:#111}
+          .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+          .badge{display:inline-flex;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-size:12px}
+          .kpi{font-size:20px;font-weight:900}
+          .kanban{display:flex;gap:10px;overflow:auto}
+          .col{min-width:260px;flex:0 0 auto}
+          .col h3{margin:8px 0 6px 0}
+          .item{padding:10px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.03);margin:8px 0}
+          .small{font-size:12px;color:var(--muted)}
+          hr{border:0;border-top:1px solid var(--border);margin:12px 0}
+          EOF
+
+          cat > public/sw.js << 'EOF'
+          const CACHE = 'dp-crm-v1';
+          const ASSETS = ['./','./index.html','./styles.css','./app.js','./sw.js'];
+          self.addEventListener('install', e => {
+            e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+          });
+          self.addEventListener('fetch', e => {
+            e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+          });
+          EOF
+
+          cat > public/app.js << 'EOF'
+          document.getElementById('view').innerHTML =
+            '<div class="card">CRM создана. Дальше добавим поля, страницы и мониторинг.</div>';
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: public
