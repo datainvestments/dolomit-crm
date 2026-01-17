@@ -20,12 +20,12 @@ jobs:
           <head>
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width,initial-scale=1" />
-            <title>DolomitPulse CRM</title>
+            <title>dolomitpulse.ai</title>
             <link rel="stylesheet" href="styles.css" />
           </head>
           <body>
             <header class="topbar">
-              <div class="brand" id="brandTitle">DolomitPulse CRM</div>
+              <div class="brand" id="brandTitle">dolomitpulse.ai</div>
               <div class="topbar-actions">
                 <select id="lang">
                   <option value="ru">RU</option>
