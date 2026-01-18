@@ -1,204 +1,129 @@
 <!doctype html>
-<html lang="ru" data-theme="dark">
+<html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DolomitPulse.ai</title>
-  <meta name="description" content="DolomitPulse.ai — CRM платформа для покупателей и поставщиков доломита" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>dolomitpulse.ai — CRM</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Top bar -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">DP</div>
-      <div class="brandText">
-        <div id="brand" class="brandName">DolomitPulse.ai</div>
-        <div id="tagline" class="brandTag">Платформа для покупателей и поставщиков доломита</div>
-      </div>
-    </div>
-
-    <div class="topControls">
-      <div class="control">
-        <div class="label">Язык</div>
-        <select id="langSelect" class="select"></select>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">DP</div>
+        <div class="brandText">
+          <div class="brandTitle">dolomitpulse.ai</div>
+          <div class="brandSub" id="brandSub">CRM + мониторинг рынка доломита</div>
+        </div>
       </div>
 
-      <div class="control">
-        <div class="label">Роль</div>
-        <select id="roleSelect" class="select"></select>
-      </div>
+      <div class="topbarRight">
+        <div class="pill" id="rolePill">Покупатель</div>
 
-      <div class="control">
-        <div class="label">Тема</div>
-        <button id="themeBtn" class="btn ghost">Тёмная</button>
-      </div>
-    </div>
-  </header>
+        <select id="langSelect" class="langSelect" aria-label="Language"></select>
 
-  <main class="shell">
-    <!-- Left navigation -->
+        <button class="btn btnGhost" id="btnTheme" type="button">Тема</button>
+      </div>
+    </header>
+
     <aside class="sidebar">
-      <nav id="nav" class="nav"></nav>
+      <div class="sidebarSection">
+        <div class="sidebarTitle" id="navTitle">Навигация</div>
+        <nav class="nav">
+          <button class="navItem active" data-view="dashboard">
+            <span class="navDot"></span><span id="navDashboard">Дашборд</span>
+          </button>
+          <button class="navItem" data-view="deals">
+            <span class="navDot"></span><span id="navDeals">Сделки</span>
+          </button>
+          <button class="navItem" data-view="contacts">
+            <span class="navDot"></span><span id="navContacts">Контакты</span>
+          </button>
+          <button class="navItem" data-view="monitoring">
+            <span class="navDot"></span><span id="navMonitoring">Мониторинг</span>
+          </button>
+          <button class="navItem" data-view="referrals">
+            <span class="navDot"></span><span id="navReferrals">Рефералы</span>
+          </button>
+          <button class="navItem" data-view="docs">
+            <span class="navDot"></span><span id="navDocs">Документы</span>
+          </button>
+          <button class="navItem" data-view="ai">
+            <span class="navDot"></span><span id="navAI">AI-переписка</span>
+          </button>
+          <button class="navItem" data-view="settings">
+            <span class="navDot"></span><span id="navSettings">Настройки</span>
+          </button>
+        </nav>
+      </div>
 
-      <section class="kpi">
-        <div class="kpiCard">
-          <div id="kpiDealsLabel" class="muted">Сделки</div>
-          <div id="kpiDeals" class="kpiValue">0</div>
+      <div class="sidebarSection">
+        <div class="sidebarTitle" id="roleTitle">Роль</div>
+        <div class="roleGrid">
+          <button class="roleBtn active" data-role="buyer" id="roleBuyer">Покупатель</button>
+          <button class="roleBtn" data-role="supplier" id="roleSupplier">Поставщик</button>
+          <button class="roleBtn" data-role="referral" id="roleReferral">Реферальный партнёр</button>
+          <button class="roleBtn" data-role="admin" id="roleAdmin">Админ</button>
         </div>
-        <div class="kpiCard">
-          <div id="kpiContactsLabel" class="muted">Контакты</div>
-          <div id="kpiContacts" class="kpiValue">0</div>
+      </div>
+
+      <div class="sidebarFooter">
+        <div class="miniHint" id="miniHint">
+          Данные сейчас в браузере (localStorage). Подключение Supabase — следующий этап.
         </div>
-        <div class="kpiCard">
-          <div id="kpiPointsLabel" class="muted">Очки</div>
-          <div id="kpiPoints" class="kpiValue">0</div>
-        </div>
-        <div class="kpiCard">
-          <div id="kpiLevelLabel" class="muted">Уровень</div>
-          <div id="kpiLevel" class="kpiValue">1</div>
-        </div>
-      </section>
+      </div>
     </aside>
 
-    <!-- Content -->
-    <section class="content">
-      <div class="contentHeader">
-        <h1 id="pageTitle" class="pageTitle">Обзор</h1>
-      </div>
-
-      <!-- Pages -->
-      <div class="pages">
-
-        <section class="page" data-page="dashboard">
-          <div class="card">
-            <h2 id="dashTitle">Обзор</h2>
-            <p class="muted">
-              Это бесплатная CRM-демо под dolomitpulse.ai. Данные сохраняются в браузере (localStorage).
-              Следующий шаг — подключить Supabase, чтобы было “по-настоящему” (пользователи, база, файлы).
-            </p>
+    <main class="main">
+      <section class="hero">
+        <div class="heroLeft">
+          <div class="hTitle" id="hTitle">Рабочая область DolomitPulse</div>
+          <div class="hText" id="hText">
+            CRM для доломита: сделки, контакты, рефералы, мониторинг рынка, документы и AI-шаблоны переписки.
           </div>
-
-          <div class="grid2">
-            <div class="card">
-              <h3>Что умеет сейчас</h3>
-              <ul class="list">
-                <li>Роли: покупатель / поставщик / реф.партнёр / админ</li>
-                <li>Сделки + смена этапов (клик по строке)</li>
-                <li>Контакты + импорт CSV</li>
-                <li>Документы (заголовки/типы — демо)</li>
-                <li>Реферальные ссылки + демо-статистика</li>
-                <li>Мониторинг сигналов рынка (демо)</li>
-                <li>AI-шаблоны сообщений (без внешнего ИИ)</li>
-                <li>Геймификация: очки и уровни</li>
-              </ul>
+          <div class="heroActions">
+            <button class="btn btnPrimary" id="btnQuickAdd">Быстро добавить</button>
+            <button class="btn" id="btnExport">Экспорт JSON</button>
+            <label class="btn btnGhost fileLabel">
+              <input type="file" id="importFile" accept="application/json" hidden />
+              Импорт JSON
+            </label>
+          </div>
+        </div>
+        <div class="heroRight">
+          <div class="kpiGrid">
+            <div class="kpiCard">
+              <div class="kpiLabel" id="kpiDealsLabel">Активные сделки</div>
+              <div class="kpiValue" id="kpiDeals">0</div>
             </div>
-
-            <div class="card">
-              <h3>Как проверить быстро</h3>
-              <ul class="list">
-                <li>Выбери язык вверху — меню сразу поменяется</li>
-                <li>Зайди в “Контакты” → “Загрузить базу (CSV)”</li>
-                <li>Зайди в “Рефералы” → “Сгенерировать ссылку”</li>
-                <li>Зайди в “Сделки” → клик по сделке меняет этап</li>
-              </ul>
+            <div class="kpiCard">
+              <div class="kpiLabel" id="kpiContactsLabel">Контакты</div>
+              <div class="kpiValue" id="kpiContacts">0</div>
+            </div>
+            <div class="kpiCard">
+              <div class="kpiLabel" id="kpiSignalsLabel">Сигналы мониторинга</div>
+              <div class="kpiValue" id="kpiSignals">0</div>
+            </div>
+            <div class="kpiCard">
+              <div class="kpiLabel" id="kpiXPLabel">XP (геймификация)</div>
+              <div class="kpiValue" id="kpiXP">0</div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="page hidden" data-page="deals">
-          <div class="row between">
-            <h2 id="dealsTitle">Сделки</h2>
-            <button id="btnNewDeal" class="btn">Создать сделку</button>
+      <section class="content">
+        <div class="viewHeader">
+          <div class="viewTitle" id="viewTitle">Дашборд</div>
+          <div class="viewTools">
+            <input class="input" id="searchInput" placeholder="Поиск..." />
           </div>
-          <div id="dealsList" class="mt"></div>
-          <p class="muted mtSmall">Подсказка: клик по сделке — меняет этап (Лид → Переписка → Документы → Сделка).</p>
-        </section>
+        </div>
 
-        <section class="page hidden" data-page="contacts">
-          <div class="row between">
-            <h2 id="contactsTitle">Контакты</h2>
-            <div class="row gap">
-              <input id="fileInput" type="file" accept=".csv" class="hidden" />
-              <button id="btnUpload" class="btn ghost">Загрузить базу (CSV)</button>
-              <button id="btnNewContact" class="btn">Добавить контакт</button>
-            </div>
-          </div>
-          <div id="csvHint" class="muted mtSmall"></div>
-          <div id="contactsList" class="mt"></div>
-        </section>
-
-        <section class="page hidden" data-page="docs">
-          <div class="row between">
-            <h2 id="docsTitle">Документы</h2>
-            <button id="btnAddDoc" class="btn">Добавить документ</button>
-          </div>
-          <div id="docsList" class="grid3 mt"></div>
-          <p class="muted mtSmall">Сейчас “документы” — демо карточки. Дальше подключим Supabase Storage для реальных файлов.</p>
-        </section>
-
-        <section class="page hidden" data-page="ref">
-          <div class="row between">
-            <h2 id="refTitle">Рефералы</h2>
-            <button id="btnGenLink" class="btn">Сгенерировать ссылку</button>
-          </div>
-          <div id="refList" class="grid2 mt"></div>
-          <p class="muted mtSmall">Кнопка “Simulate +” — имитирует клики/лиды/сделки (демо).</p>
-        </section>
-
-        <section class="page hidden" data-page="monitoring">
-          <div class="row between">
-            <div>
-              <h2 id="monTitle">Мониторинг</h2>
-              <div id="monHint" class="muted"></div>
-            </div>
-            <button id="btnAddSignal" class="btn ghost">+ Signal</button>
-          </div>
-          <div id="monList" class="grid2 mt"></div>
-        </section>
-
-        <section class="page hidden" data-page="ai">
-          <div class="card">
-            <div class="row between">
-              <div>
-                <h2 id="aiTitle">AI-переписка</h2>
-                <div id="aiHint" class="muted"></div>
-              </div>
-              <select id="tplSelect" class="select"></select>
-            </div>
-
-            <div class="mt">
-              <textarea id="aiText" class="textarea" rows="10"></textarea>
-            </div>
-
-            <div class="row right mt">
-              <button id="btnSend" class="btn">Отправить</button>
-            </div>
-
-            <p class="muted mtSmall">
-              Это пока шаблоны (без внешнего ИИ). Следующий этап: подключим бесплатный open-source LLM (через API провайдера),
-              или сделаем простого “помощника” на правилах/шаблонах под доломит.
-            </p>
-          </div>
-        </section>
-
-        <section class="page hidden" data-page="settings">
-          <div class="card">
-            <h2 id="settingsTitle">Настройки проекта</h2>
-            <p class="muted">
-              Сейчас проект работает без сервера. После подключения Supabase появятся: логины, права доступа, реальная база, файлы.
-            </p>
-            <div class="row gap mt">
-              <button id="btnReset" class="btn ghost">Reset demo data</button>
-            </div>
-          </div>
-        </section>
-
-      </div>
-    </section>
-  </main>
-
-  <div id="toast" class="toast"></div>
+        <div id="viewContainer"></div>
+      </section>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>
