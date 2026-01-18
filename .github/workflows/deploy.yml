@@ -1,4 +1,5 @@
 name: Deploy CRM to GitHub Pages
+
 on:
   workflow_dispatch:
 
@@ -8,106 +9,416 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Create static CRM files
         run: |
           mkdir -p public
+
           cat > public/index.html << 'EOF'
           <!doctype html>
           <html lang="ru">
           <head>
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width,initial-scale=1" />
-            <title>dolomitpulse.ai</title>
+            <title>DolomitPulse CRM</title>
             <link rel="stylesheet" href="styles.css" />
           </head>
           <body>
-            <header class="topbar">
-              <div class="brand" id="brandTitle">dolomitpulse.ai</div>
-              <div class="topbar-actions">
-                <select id="lang">
-                  <option value="ru">RU</option>
-                  <option value="en">EN</option>
-                </select>
-              </div>
-            </header>
+            <div class="app">
+              <aside class="sidebar">
+                <div class="brand">
+                  <div class="brand-title" data-i18n="brand">DolomitPulse CRM</div>
 
-            <nav class="tabs">
-              <button class="tab active" data-tab="leads" id="tabLeads">Лиды</button>
-              <button class="tab" data-tab="deals" id="tabDeals">Сделки</button>
-              <button class="tab" data-tab="lots" id="tabLots">Партии</button>
-              <button class="tab" data-tab="monitor" id="tabMonitor">Мониторинг</button>
-              <button class="tab" data-tab="settings" id="tabSettings">Настройки</button>
-            </nav>
+                  <div class="lang-wrap">
+                    <label class="lang-label" data-i18n="language">Язык</label>
+                    <select id="langSelect" class="lang-select" aria-label="Language">
+                      <option value="ru">Русский</option>
+                      <option value="kk">Қазақша</option>
+                      <option value="ky">Кыргызча</option>
+                      <option value="en">English</option>
+                      <option value="zh">中文</option>
+                    </select>
+                  </div>
+                </div>
 
-            <main class="container">
-              <section id="view"></section>
-            </main>
+                <nav class="menu">
+                  <button class="menu-item active" data-view="dashboard" data-i18n="menu_dashboard">Дашборд</button>
+                  <button class="menu-item" data-view="deals" data-i18n="menu_deals">Сделки</button>
+                  <button class="menu-item" data-view="contacts" data-i18n="menu_contacts">Контакты</button>
+                  <button class="menu-item" data-view="companies" data-i18n="menu_companies">Компании</button>
+                  <button class="menu-item" data-view="signals" data-i18n="menu_signals">Мониторинг рынка</button>
+                  <button class="menu-item" data-view="documents" data-i18n="menu_documents">Документы</button>
+                  <button class="menu-item" data-view="referrals" data-i18n="menu_referrals">Рефералы</button>
+                  <button class="menu-item" data-view="settings" data-i18n="menu_settings">Настройки</button>
+                </nav>
+
+                <div class="footer-note" data-i18n="footer_note">
+                  MVP: CRM + мониторинг + рефералы + документы
+                </div>
+              </aside>
+
+              <main class="main">
+                <header class="topbar">
+                  <div class="page-title" id="pageTitle" data-i18n="title_dashboard">Дашборд</div>
+                  <div class="top-actions">
+                    <button class="btn" id="btnNew" data-i18n="btn_new">Создать</button>
+                    <button class="btn primary" id="btnExport" data-i18n="btn_export">Экспорт</button>
+                  </div>
+                </header>
+
+                <section class="content" id="content">
+                  <div class="cards">
+                    <div class="card">
+                      <div class="card-h" data-i18n="kpi_deals">Сделки</div>
+                      <div class="card-v" id="kpiDeals">0</div>
+                      <div class="card-s" data-i18n="kpi_deals_s">в работе</div>
+                    </div>
+                    <div class="card">
+                      <div class="card-h" data-i18n="kpi_contacts">Контакты</div>
+                      <div class="card-v" id="kpiContacts">0</div>
+                      <div class="card-s" data-i18n="kpi_contacts_s">в базе</div>
+                    </div>
+                    <div class="card">
+                      <div class="card-h" data-i18n="kpi_signals">Сигналы</div>
+                      <div class="card-v" id="kpiSignals">0</div>
+                      <div class="card-s" data-i18n="kpi_signals_s">новые</div>
+                    </div>
+                    <div class="card">
+                      <div class="card-h" data-i18n="kpi_points">Очки</div>
+                      <div class="card-v" id="kpiPoints">0</div>
+                      <div class="card-s" data-i18n="kpi_points_s">геймификация</div>
+                    </div>
+                  </div>
+
+                  <div class="panel">
+                    <div class="panel-h" data-i18n="quick_start">Быстрый старт</div>
+                    <ol class="panel-list">
+                      <li data-i18n="qs1">Добавьте компанию покупателя и поставщика</li>
+                      <li data-i18n="qs2">Создайте сделку по доломиту (объем, цена, Incoterms)</li>
+                      <li data-i18n="qs3">Загрузите LOI/контракт в документы</li>
+                      <li data-i18n="qs4">Создайте реферальную ссылку и отслеживайте лидов</li>
+                    </ol>
+                  </div>
+                </section>
+              </main>
+            </div>
 
             <script src="app.js"></script>
-            <script>
-              if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
-            </script>
           </body>
           </html>
           EOF
 
           cat > public/styles.css << 'EOF'
           :root{
-            --bg:#0b0f19;
-            --card:#121a2a;
-            --text:#e8eefc;
-            --muted:#a9b7d0;
-            --primary:#f5c400;
-            --border:rgba(255,255,255,.08);
+            --bg:#0b0f14;
+            --panel:#0f1621;
+            --panel2:#121b28;
+            --text:#e6edf3;
+            --muted:#9fb0c0;
+            --line:#1f2b3a;
+            --accent:#ffd400;
+            --accent2:#111827;
+            --btn:#182233;
+            --btn2:#243249;
+            --ok:#2ea043;
           }
           *{box-sizing:border-box}
           body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-          .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10}
-          .brand{font-weight:800}
-          .tabs{display:flex;gap:8px;padding:10px 12px;overflow:auto;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:52px;z-index:9}
-          .tab{border:1px solid var(--border);background:transparent;color:var(--text);padding:8px 12px;border-radius:12px;white-space:nowrap}
-          .tab.active{background:var(--primary);color:#111;border-color:transparent;font-weight:700}
-          .container{padding:12px;max-width:980px;margin:0 auto}
-          .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px;margin:10px 0}
-          .row{display:flex;gap:10px;flex-wrap:wrap}
-          .field{display:flex;flex-direction:column;gap:6px;min-width:220px;flex:1}
-          label{color:var(--muted);font-size:12px}
-          input,select,textarea{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:12px;outline:none}
-          textarea{min-height:88px}
-          .btn{border:0;border-radius:12px;padding:10px 12px;font-weight:700}
-          .btn-primary{background:var(--primary);color:#111}
-          .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
-          .badge{display:inline-flex;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-size:12px}
-          .kpi{font-size:20px;font-weight:900}
-          .kanban{display:flex;gap:10px;overflow:auto}
-          .col{min-width:260px;flex:0 0 auto}
-          .col h3{margin:8px 0 6px 0}
-          .item{padding:10px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.03);margin:8px 0}
-          .small{font-size:12px;color:var(--muted)}
-          hr{border:0;border-top:1px solid var(--border);margin:12px 0}
-          EOF
-
-          cat > public/sw.js << 'EOF'
-          const CACHE = 'dp-crm-v1';
-          const ASSETS = ['./','./index.html','./styles.css','./app.js','./sw.js'];
-          self.addEventListener('install', e => {
-            e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
-          });
-          self.addEventListener('fetch', e => {
-            e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-          });
+          .app{display:flex;min-height:100vh}
+          .sidebar{width:280px;background:linear-gradient(180deg,var(--panel),var(--panel2));border-right:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:14px}
+          .brand{display:flex;flex-direction:column;gap:10px}
+          .brand-title{font-weight:800;font-size:18px;letter-spacing:.2px}
+          .lang-wrap{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.15)}
+          .lang-label{font-size:12px;color:var(--muted)}
+          .lang-select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1320;color:var(--text);outline:none}
+          .menu{display:flex;flex-direction:column;gap:8px}
+          .menu-item{width:100%;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.12);color:var(--text);cursor:pointer}
+          .menu-item:hover{background:rgba(255,212,0,.08);border-color:rgba(255,212,0,.35)}
+          .menu-item.active{background:rgba(255,212,0,.12);border-color:rgba(255,212,0,.55)}
+          .footer-note{margin-top:auto;color:var(--muted);font-size:12px;line-height:1.4}
+          .main{flex:1;display:flex;flex-direction:column}
+          .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.18);backdrop-filter:blur(8px)}
+          .page-title{font-weight:800;font-size:18px}
+          .top-actions{display:flex;gap:10px}
+          .btn{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--btn);color:var(--text);cursor:pointer}
+          .btn:hover{background:var(--btn2)}
+          .btn.primary{background:var(--accent);border-color:rgba(255,212,0,.8);color:#101214;font-weight:800}
+          .content{padding:18px;display:flex;flex-direction:column;gap:16px}
+          .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+          .card{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.12);padding:14px}
+          .card-h{color:var(--muted);font-size:12px}
+          .card-v{font-size:28px;font-weight:900;margin-top:8px}
+          .card-s{color:var(--muted);font-size:12px;margin-top:4px}
+          .panel{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.12);padding:14px}
+          .panel-h{font-weight:800;margin-bottom:10px}
+          .panel-list{margin:0;padding-left:18px;color:var(--muted);line-height:1.6}
+          @media (max-width: 980px){
+            .sidebar{width:240px}
+            .cards{grid-template-columns:repeat(2,1fr)}
+          }
+          @media (max-width: 720px){
+            .app{flex-direction:column}
+            .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--line)}
+            .topbar{flex-direction:column;align-items:flex-start;gap:10px}
+            .cards{grid-template-columns:1fr}
+          }
           EOF
 
           cat > public/app.js << 'EOF'
-          document.getElementById('view').innerHTML =
-            '<div class="card">CRM создана. Дальше добавим поля, страницы и мониторинг.</div>';
+          // DolomitPulse CRM — i18n + простой SPA-скелет
+          const I18N = {
+            ru: {
+              brand: "DolomitPulse CRM",
+              language: "Язык",
+              menu_dashboard: "Дашборд",
+              menu_deals: "Сделки",
+              menu_contacts: "Контакты",
+              menu_companies: "Компании",
+              menu_signals: "Мониторинг рынка",
+              menu_documents: "Документы",
+              menu_referrals: "Рефералы",
+              menu_settings: "Настройки",
+              footer_note: "MVP: CRM + мониторинг + рефералы + документы",
+              title_dashboard: "Дашборд",
+              btn_new: "Создать",
+              btn_export: "Экспорт",
+              kpi_deals: "Сделки",
+              kpi_deals_s: "в работе",
+              kpi_contacts: "Контакты",
+              kpi_contacts_s: "в базе",
+              kpi_signals: "Сигналы",
+              kpi_signals_s: "новые",
+              kpi_points: "Очки",
+              kpi_points_s: "геймификация",
+              quick_start: "Быстрый старт",
+              qs1: "Добавьте компанию покупателя и поставщика",
+              qs2: "Создайте сделку по доломиту (объем, цена, Incoterms)",
+              qs3: "Загрузите LOI/контракт в документы",
+              qs4: "Создайте реферальную ссылку и отслеживайте лидов",
+            },
+            kk: {
+              brand: "DolomitPulse CRM",
+              language: "Тіл",
+              menu_dashboard: "Басқару панелі",
+              menu_deals: "Мәмілелер",
+              menu_contacts: "Байланыстар",
+              menu_companies: "Компаниялар",
+              menu_signals: "Нарықты мониторинг",
+              menu_documents: "Құжаттар",
+              menu_referrals: "Рефералдар",
+              menu_settings: "Баптаулар",
+              footer_note: "MVP: CRM + мониторинг + рефералдар + құжаттар",
+              title_dashboard: "Басқару панелі",
+              btn_new: "Құру",
+              btn_export: "Экспорт",
+              kpi_deals: "Мәмілелер",
+              kpi_deals_s: "жұмыста",
+              kpi_contacts: "Байланыстар",
+              kpi_contacts_s: "базада",
+              kpi_signals: "Сигналдар",
+              kpi_signals_s: "жаңа",
+              kpi_points: "Ұпайлар",
+              kpi_points_s: "геймификация",
+              quick_start: "Жылдам бастау",
+              qs1: "Сатып алушы және жеткізуші компанияны қосыңыз",
+              qs2: "Доломит мәмілесін жасаңыз (көлем, баға, Incoterms)",
+              qs3: "LOI/келісімшартты құжаттарға жүктеңіз",
+              qs4: "Реферал сілтемесін жасап, лидтерді бақылаңыз",
+            },
+            ky: {
+              brand: "DolomitPulse CRM",
+              language: "Тил",
+              menu_dashboard: "Башкы панель",
+              menu_deals: "Бүтүмдөр",
+              menu_contacts: "Контактылар",
+              menu_companies: "Компаниялар",
+              menu_signals: "Рынок мониторинги",
+              menu_documents: "Документтер",
+              menu_referrals: "Рефералдар",
+              menu_settings: "Орнотуулар",
+              footer_note: "MVP: CRM + мониторинг + реферал + документ",
+              title_dashboard: "Башкы панель",
+              btn_new: "Түзүү",
+              btn_export: "Экспорт",
+              kpi_deals: "Бүтүмдөр",
+              kpi_deals_s: "иште",
+              kpi_contacts: "Контактылар",
+              kpi_contacts_s: "базада",
+              kpi_signals: "Сигналдар",
+              kpi_signals_s: "жаңы",
+              kpi_points: "Упайлар",
+              kpi_points_s: "геймификация",
+              quick_start: "Тез старт",
+              qs1: "Сатып алуучу жана жеткирүүчү компанияны кошуңуз",
+              qs2: "Доломит бүтүмүн түзүңүз (көлем, баа, Incoterms)",
+              qs3: "LOI/келишимди документтерге жүктөңүз",
+              qs4: "Реферал шилтемесин түзүп, лидтерди көзөмөлдөңүз",
+            },
+            en: {
+              brand: "DolomitPulse CRM",
+              language: "Language",
+              menu_dashboard: "Dashboard",
+              menu_deals: "Deals",
+              menu_contacts: "Contacts",
+              menu_companies: "Companies",
+              menu_signals: "Market monitoring",
+              menu_documents: "Documents",
+              menu_referrals: "Referrals",
+              menu_settings: "Settings",
+              footer_note: "MVP: CRM + monitoring + referrals + documents",
+              title_dashboard: "Dashboard",
+              btn_new: "Create",
+              btn_export: "Export",
+              kpi_deals: "Deals",
+              kpi_deals_s: "in progress",
+              kpi_contacts: "Contacts",
+              kpi_contacts_s: "in database",
+              kpi_signals: "Signals",
+              kpi_signals_s: "new",
+              kpi_points: "Points",
+              kpi_points_s: "gamification",
+              quick_start: "Quick start",
+              qs1: "Add buyer and supplier companies",
+              qs2: "Create a dolomite deal (volume, price, Incoterms)",
+              qs3: "Upload LOI/contract to documents",
+              qs4: "Create a referral link and track leads",
+            },
+            zh: {
+              brand: "白云石脉冲 CRM",
+              language: "语言",
+              menu_dashboard: "仪表盘",
+              menu_deals: "交易",
+              menu_contacts: "联系人",
+              menu_companies: "公司",
+              menu_signals: "市场监控",
+              menu_documents: "文件",
+              menu_referrals: "推荐",
+              menu_settings: "设置",
+              footer_note: "MVP：CRM + 监控 + 推荐 + 文件",
+              title_dashboard: "仪表盘",
+              btn_new: "创建",
+              btn_export: "导出",
+              kpi_deals: "交易",
+              kpi_deals_s: "进行中",
+              kpi_contacts: "联系人",
+              kpi_contacts_s: "在库",
+              kpi_signals: "信号",
+              kpi_signals_s: "新的",
+              kpi_points: "积分",
+              kpi_points_s: "游戏化",
+              quick_start: "快速开始",
+              qs1: "添加买方与供应方公司",
+              qs2: "创建白云石交易（数量、价格、Incoterms）",
+              qs3: "上传 LOI/合同 到文件",
+              qs4: "创建推荐链接并跟踪线索",
+            }
+          };
+
+          const supported = ["ru","kk","ky","en","zh"];
+
+          function guessLang() {
+            const saved = localStorage.getItem("dp_lang");
+            if (saved && supported.includes(saved)) return saved;
+
+            const nav = (navigator.language || "ru").toLowerCase();
+            if (nav.startsWith("kk")) return "kk";
+            if (nav.startsWith("ky")) return "ky";
+            if (nav.startsWith("zh")) return "zh";
+            if (nav.startsWith("en")) return "en";
+            return "ru";
+          }
+
+          function applyI18n(lang) {
+            const dict = I18N[lang] || I18N.ru;
+            document.documentElement.lang = lang;
+            document.title = dict.brand || "DolomitPulse CRM";
+
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+              const k = el.getAttribute("data-i18n");
+              if (dict[k]) el.textContent = dict[k];
+            });
+
+            // Заголовок страницы
+            const pageTitle = document.getElementById("pageTitle");
+            if (pageTitle && dict["title_dashboard"]) pageTitle.textContent = dict["title_dashboard"];
+          }
+
+          function setLang(lang) {
+            if (!supported.includes(lang)) lang = "ru";
+            localStorage.setItem("dp_lang", lang);
+            const select = document.getElementById("langSelect");
+            if (select) select.value = lang;
+            applyI18n(lang);
+          }
+
+          // Навигация по разделам (пока каркас)
+          function bindMenu() {
+            document.querySelectorAll(".menu-item").forEach(btn => {
+              btn.addEventListener("click", () => {
+                document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                const view = btn.getAttribute("data-view");
+                const pageTitle = document.getElementById("pageTitle");
+                if (!pageTitle) return;
+
+                const lang = localStorage.getItem("dp_lang") || "ru";
+                const dict = I18N[lang] || I18N.ru;
+
+                const map = {
+                  dashboard: dict.title_dashboard,
+                  deals: dict.menu_deals,
+                  contacts: dict.menu_contacts,
+                  companies: dict.menu_companies,
+                  signals: dict.menu_signals,
+                  documents: dict.menu_documents,
+                  referrals: dict.menu_referrals,
+                  settings: dict.menu_settings
+                };
+                pageTitle.textContent = map[view] || "DolomitPulse CRM";
+              });
+            });
+
+            const select = document.getElementById("langSelect");
+            if (select) {
+              select.addEventListener("change", (e) => {
+                setLang(e.target.value);
+              });
+            }
+          }
+
+          // KPI (пока демо)
+          function loadDemoKPIs() {
+            const get = (k, d=0) => Number(localStorage.getItem(k) || d);
+            document.getElementById("kpiDeals").textContent = get("kpi_deals", 0);
+            document.getElementById("kpiContacts").textContent = get("kpi_contacts", 0);
+            document.getElementById("kpiSignals").textContent = get("kpi_signals", 0);
+            document.getElementById("kpiPoints").textContent = get("kpi_points", 0);
+          }
+
+          (function init(){
+            bindMenu();
+            loadDemoKPIs();
+            setLang(guessLang());
+          })();
           EOF
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: public
+      - name: Deploy to gh-pages
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          # Создать ветку gh-pages
+          git checkout --orphan gh-pages
+          git rm -rf .
+
+          cp -r public/* .
+
+          git add .
+          git commit -m "Deploy CRM site"
+          git push -f origin gh-pages
+
+      - name: Done
+        run: echo "Deployed"
