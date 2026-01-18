@@ -1,176 +1,252 @@
-// DolomitPulse CRM — i18n (RU/EN/KK/KY/ZH) + dropdown
-const LANGS = [
-  { code: "ru", label: "Русский" },
-  { code: "en", label: "English" },
-  { code: "kk", label: "Қазақша" },
-  { code: "ky", label: "Кыргызча" },
-  { code: "zh", label: "中文" },
-];
-
-const I18N = {
-  ru: {
-    appName: "DolomitPulse CRM",
-    lang: "Язык",
-    home: "Главная",
-    clients: "Клиенты",
-    deals: "Сделки",
-    docs: "Документы",
-    referrals: "Рефералы",
-    analytics: "Аналитика",
-    add: "Добавить",
-    upload: "Загрузить",
-    empty: "Пока пусто",
-  },
-  en: {
-    appName: "DolomitPulse CRM",
-    lang: "Language",
-    home: "Home",
-    clients: "Clients",
-    deals: "Deals",
-    docs: "Documents",
-    referrals: "Referrals",
-    analytics: "Analytics",
-    add: "Add",
-    upload: "Upload",
-    empty: "Empty for now",
-  },
-  kk: {
-    appName: "DolomitPulse CRM",
-    lang: "Тіл",
-    home: "Басты бет",
-    clients: "Клиенттер",
-    deals: "Мәмілелер",
-    docs: "Құжаттар",
-    referrals: "Рефералдар",
-    analytics: "Аналитика",
-    add: "Қосу",
-    upload: "Жүктеу",
-    empty: "Әзірше бос",
-  },
-  ky: {
-    appName: "DolomitPulse CRM",
-    lang: "Тил",
-    home: "Башкы бет",
-    clients: "Кардарлар",
-    deals: "Бүтүмдөр",
-    docs: "Документтер",
-    referrals: "Рефералдар",
-    analytics: "Аналитика",
-    add: "Кошуу",
-    upload: "Жүктөө",
-    empty: "Азырынча бош",
-  },
-  zh: {
-    appName: "白云石脉冲 CRM",
-    lang: "语言",
-    home: "主页",
-    clients: "客户",
-    deals: "交易",
-    docs: "文件",
-    referrals: "推荐",
-    analytics: "分析",
-    add: "新增",
-    upload: "上传",
-    empty: "暂无内容",
-  },
-};
-
-function getLang() {
-  const saved = localStorage.getItem("dp_lang");
-  if (saved && I18N[saved]) return saved;
-  return "ru";
-}
-function setLang(code) {
-  localStorage.setItem("dp_lang", code);
-  render();
-}
-function t(key) {
-  const lang = getLang();
-  return (I18N[lang] && I18N[lang][key]) || (I18N.ru && I18N.ru[key]) || key;
+// app.js (GitHub Pages friendly)
+const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.DP_CONFIG || {};
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  alert("Нет SUPABASE_URL или SUPABASE_ANON_KEY. Проверь config.js");
 }
 
-function el(tag, attrs = {}, children = []) {
-  const node = document.createElement(tag);
-  Object.entries(attrs).forEach(([k, v]) => {
-    if (k === "class") node.className = v;
-    else if (k.startsWith("on") && typeof v === "function") node.addEventListener(k.slice(2), v);
-    else node.setAttribute(k, v);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ---------- helpers ----------
+const $ = (sel) => document.querySelector(sel);
+
+function show(viewId) {
+  document.querySelectorAll("[data-view]").forEach((el) => (el.style.display = "none"));
+  const v = document.querySelector(`[data-view="${viewId}"]`);
+  if (v) v.style.display = "block";
+}
+
+async function ensureProfile(user, role, full_name, company) {
+  // try load
+  const { data: prof, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  // if exists
+  if (prof && !error) return prof;
+
+  // create
+  const payload = {
+    id: user.id,
+    role: role || "buyer",
+    full_name: full_name || "",
+    company: company || "",
+  };
+
+  const { data: created, error: e2 } = await supabase
+    .from("profiles")
+    .insert(payload)
+    .select("*")
+    .single();
+
+  if (e2) throw e2;
+  return created;
+}
+
+async function getMyProfile(userId) {
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();
+  if (error) throw error;
+  return data;
+}
+
+// ---------- auth ----------
+async function signUp(email, password) {
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) throw error;
+  return data;
+}
+
+async function signIn(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+}
+
+// ---------- crm actions ----------
+async function createLead(userId, title, note) {
+  const { data, error } = await supabase
+    .from("leads")
+    .insert({ owner_id: userId, title, note })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function listLeads(userId) {
+  const { data, error } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("owner_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+// ---------- UI wiring ----------
+async function refreshLeads(userId) {
+  const list = $("#leadsList");
+  list.innerHTML = "Загрузка...";
+  try {
+    const items = await listLeads(userId);
+    if (!items.length) {
+      list.innerHTML = "<div class='muted'>Пока нет лидов</div>";
+      return;
+    }
+    list.innerHTML = items
+      .map(
+        (x) => `
+        <div class="card">
+          <div class="row">
+            <div>
+              <div class="h">${escapeHtml(x.title || "Без названия")}</div>
+              <div class="muted">${escapeHtml(x.note || "")}</div>
+            </div>
+            <div class="muted small">${formatDate(x.created_at)}</div>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+  } catch (e) {
+    list.innerHTML = `<div class='error'>Ошибка: ${escapeHtml(e.message || String(e))}</div>`;
+  }
+}
+
+function formatDate(iso) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString();
+  } catch {
+    return iso;
+  }
+}
+
+function escapeHtml(s) {
+  return String(s || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+async function boot() {
+  // views default
+  show("loading");
+
+  const { data: sess } = await supabase.auth.getSession();
+  if (sess?.session?.user) {
+    await onLoggedIn(sess.session.user);
+  } else {
+    show("auth");
+  }
+
+  // auth buttons
+  $("#btnSignup").addEventListener("click", async () => {
+    const email = $("#authEmail").value.trim();
+    const pass = $("#authPass").value.trim();
+    const role = $("#roleSelect").value;
+    const full = $("#fullName").value.trim();
+    const comp = $("#company").value.trim();
+
+    $("#authMsg").textContent = "Создаю аккаунт...";
+    try {
+      const res = await signUp(email, pass);
+
+      // in many projects, Supabase requires email confirmation.
+      // If user is already available, create profile immediately.
+      const user = res?.user || res?.data?.user || res?.session?.user;
+      if (user) {
+        await ensureProfile(user, role, full, comp);
+      }
+
+      $("#authMsg").textContent =
+        "Готово. Если включено подтверждение email, проверь почту и зайди через Login.";
+    } catch (e) {
+      $("#authMsg").textContent = `Ошибка: ${e.message || e}`;
+    }
   });
-  children.forEach((c) => node.appendChild(typeof c === "string" ? document.createTextNode(c) : c));
-  return node;
+
+  $("#btnLogin").addEventListener("click", async () => {
+    const email = $("#authEmail").value.trim();
+    const pass = $("#authPass").value.trim();
+    $("#authMsg").textContent = "Вхожу...";
+    try {
+      const res = await signIn(email, pass);
+      const user = res?.user || res?.data?.user || res?.session?.user;
+      if (!user) throw new Error("Не удалось получить пользователя");
+      await onLoggedIn(user);
+    } catch (e) {
+      $("#authMsg").textContent = `Ошибка: ${e.message || e}`;
+    }
+  });
+
+  $("#btnLogout").addEventListener("click", async () => {
+    await signOut();
+    location.reload();
+  });
+
+  $("#btnAddLead").addEventListener("click", async () => {
+    const title = $("#leadTitle").value.trim();
+    const note = $("#leadNote").value.trim();
+    const userId = $("#meUserId").textContent.trim();
+    if (!title) {
+      alert("Заполни название лида");
+      return;
+    }
+    $("#crmMsg").textContent = "Сохраняю...";
+    try {
+      await createLead(userId, title, note);
+      $("#leadTitle").value = "";
+      $("#leadNote").value = "";
+      $("#crmMsg").textContent = "Сохранено";
+      await refreshLeads(userId);
+    } catch (e) {
+      $("#crmMsg").textContent = `Ошибка: ${e.message || e}`;
+    }
+  });
+
+  // live session changes
+  supabase.auth.onAuthStateChange(async (_event, session) => {
+    if (session?.user) {
+      await onLoggedIn(session.user);
+    }
+  });
 }
 
-function render() {
-  const root = document.getElementById("app");
-  if (!root) return;
-  root.innerHTML = "";
+async function onLoggedIn(user) {
+  show("loading");
+  try {
+    // load profile; if not exist, open profile-create view
+    let profile = null;
+    try {
+      profile = await getMyProfile(user.id);
+    } catch {
+      // show quick create profile
+      $("#meUserId").textContent = user.id;
+      show("need_profile");
+      return;
+    }
 
-  const lang = getLang();
+    $("#meUserId").textContent = user.id;
+    $("#meRole").textContent = profile.role || "-";
+    $("#meName").textContent = profile.full_name || "-";
+    $("#meCompany").textContent = profile.company || "-";
 
-  // Top bar
-  const title = el("div", { class: "brand" }, [t("appName")]);
-
-  const langSelect = el("select", { class: "lang-select", id: "langSelect" },
-    LANGS.map(l => {
-      const opt = el("option", { value: l.code }, [l.label]);
-      if (l.code === lang) opt.selected = true;
-      return opt;
-    })
-  );
-  langSelect.addEventListener("change", (e) => setLang(e.target.value));
-
-  const topRight = el("div", { class: "top-right" }, [
-    el("span", { class: "label" }, [t("lang") + ": "]),
-    langSelect
-  ]);
-
-  const top = el("div", { class: "topbar" }, [title, topRight]);
-
-  // Sidebar
-  const menuItems = [
-    ["home", t("home")],
-    ["clients", t("clients")],
-    ["deals", t("deals")],
-    ["docs", t("docs")],
-    ["referrals", t("referrals")],
-    ["analytics", t("analytics")],
-  ];
-
-  const active = localStorage.getItem("dp_tab") || "home";
-
-  const nav = el("div", { class: "sidebar" },
-    menuItems.map(([key, label]) =>
-      el("button", {
-        class: "navbtn" + (key === active ? " active" : ""),
-        onclick: () => {
-          localStorage.setItem("dp_tab", key);
-          render();
-        }
-      }, [label])
-    )
-  );
-
-  // Content
-  const header = el("div", { class: "content-header" }, [
-    el("h2", {}, [menuItems.find(m => m[0] === active)?.[1] || ""]),
-    el("div", { class: "actions" }, [
-      el("button", { class: "btn", onclick: () => alert("Demo: " + t("add")) }, [t("add")]),
-      el("button", { class: "btn secondary", onclick: () => alert("Demo: " + t("upload")) }, [t("upload")]),
-    ])
-  ]);
-
-  const body = el("div", { class: "content-body" }, [
-    el("div", { class: "card" }, [
-      el("div", { class: "muted" }, [t("empty")]),
-    ])
-  ]);
-
-  const content = el("div", { class: "content" }, [header, body]);
-
-  const layout = el("div", { class: "layout" }, [nav, content]);
-
-  root.appendChild(top);
-  root.appendChild(layout);
+    show("crm");
+    $("#crmMsg").textContent = "";
+    await refreshLeads(user.id);
+  } catch (e) {
+    show("auth");
+    $("#authMsg").textContent = `Ошибка: ${e.message || e}`;
+  }
 }
 
-document.addEventListener("DOMContentLoaded", render);
+window.addEventListener("DOMContentLoaded", boot);
