@@ -1,289 +1,205 @@
- <!doctype html>
-<html lang="ru">
+<!doctype html>
+<html lang="ru" data-theme="dark">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>dolomitpulse.ai — CRM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DolomitPulse.ai</title>
+  <meta name="description" content="DolomitPulse.ai — CRM платформа для покупателей и поставщиков доломита" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Top bar -->
   <header class="topbar">
     <div class="brand">
-      <div class="logo"></div>
+      <div class="logo">DP</div>
       <div class="brandText">
-        <div class="brandTitle" data-i18n="appName">dolomitpulse.ai</div>
-        <div class="brandSub" data-i18n="appTagline">CRM для рынка доломита</div>
+        <div id="brand" class="brandName">DolomitPulse.ai</div>
+        <div id="tagline" class="brandTag">Платформа для покупателей и поставщиков доломита</div>
       </div>
     </div>
 
-    <div class="topbarRight">
-      <select id="langSelect" class="select">
-        <option value="ru">RU</option>
-        <option value="kk">KZ</option>
-        <option value="ky">KG</option>
-        <option value="en">EN</option>
-        <option value="zh">中文</option>
-      </select>
+    <div class="topControls">
+      <div class="control">
+        <div class="label">Язык</div>
+        <select id="langSelect" class="select"></select>
+      </div>
 
-      <button id="themeBtn" class="btn" type="button" title="Theme">
-        <span data-i18n="theme">Тема</span>
-      </button>
+      <div class="control">
+        <div class="label">Роль</div>
+        <select id="roleSelect" class="select"></select>
+      </div>
+
+      <div class="control">
+        <div class="label">Тема</div>
+        <button id="themeBtn" class="btn ghost">Тёмная</button>
+      </div>
     </div>
   </header>
 
-  <main class="layout">
+  <main class="shell">
+    <!-- Left navigation -->
     <aside class="sidebar">
-      <div class="card">
-        <div class="cardTitle" data-i18n="role">Роль</div>
-        <select id="roleSelect" class="select">
-          <option value="buyer" data-i18n="roleBuyer">Покупатель</option>
-          <option value="supplier" data-i18n="roleSupplier">Поставщик</option>
-          <option value="referral" data-i18n="roleReferral">Реферальный партнёр</option>
-          <option value="admin" data-i18n="roleAdmin">Админ</option>
-        </select>
-      </div>
+      <nav id="nav" class="nav"></nav>
 
-      <nav class="nav">
-        <button class="navItem active" data-page="dashboard">
-          <span data-i18n="navDashboard">Дашборд</span>
-        </button>
-        <button class="navItem" data-page="leads">
-          <span data-i18n="navLeads">Лиды</span>
-        </button>
-        <button class="navItem" data-page="monitoring">
-          <span data-i18n="navMonitoring">Мониторинг</span>
-        </button>
-        <button class="navItem" data-page="clients">
-          <span data-i18n="navClients">Клиентская база</span>
-        </button>
-        <button class="navItem" data-page="chat">
-          <span data-i18n="navChat">AI-чат</span>
-        </button>
-        <button class="navItem" data-page="docs">
-          <span data-i18n="navDocs">Документы (LOI/SPA)</span>
-        </button>
-        <button class="navItem" data-page="referrals">
-          <span data-i18n="navReferrals">Рефералы</span>
-        </button>
-        <button class="navItem" data-page="settings">
-          <span data-i18n="navSettings">Настройки</span>
-        </button>
-      </nav>
-
-      <div class="footerHint">
-        <div class="hintTitle" data-i18n="hintTitle">Подсказка</div>
-        <div class="hintText" data-i18n="hintText">
-          Это стартовая версия. Дальше подключим Supabase для логина, базы и прав доступа.
+      <section class="kpi">
+        <div class="kpiCard">
+          <div id="kpiDealsLabel" class="muted">Сделки</div>
+          <div id="kpiDeals" class="kpiValue">0</div>
         </div>
-      </div>
+        <div class="kpiCard">
+          <div id="kpiContactsLabel" class="muted">Контакты</div>
+          <div id="kpiContacts" class="kpiValue">0</div>
+        </div>
+        <div class="kpiCard">
+          <div id="kpiPointsLabel" class="muted">Очки</div>
+          <div id="kpiPoints" class="kpiValue">0</div>
+        </div>
+        <div class="kpiCard">
+          <div id="kpiLevelLabel" class="muted">Уровень</div>
+          <div id="kpiLevel" class="kpiValue">1</div>
+        </div>
+      </section>
     </aside>
 
+    <!-- Content -->
     <section class="content">
-      <div class="pageHeader">
-        <h1 id="pageTitle" data-i18n="dashboardTitle">Дашборд</h1>
-        <div class="pill" id="rolePill">buyer</div>
+      <div class="contentHeader">
+        <h1 id="pageTitle" class="pageTitle">Обзор</h1>
       </div>
 
-      <!-- DASHBOARD -->
-      <div class="page" id="page-dashboard">
-        <div class="grid3">
-          <div class="stat">
-            <div class="statLabel" data-i18n="statLeads">Лиды</div>
-            <div class="statValue" id="statLeads">0</div>
-          </div>
-          <div class="stat">
-            <div class="statLabel" data-i18n="statDeals">Сделки</div>
-            <div class="statValue" id="statDeals">0</div>
-          </div>
-          <div class="stat">
-            <div class="statLabel" data-i18n="statScore">Очки</div>
-            <div class="statValue" id="statScore">0</div>
-          </div>
-        </div>
+      <!-- Pages -->
+      <div class="pages">
 
-        <div class="card wide">
-          <div class="cardTitle" data-i18n="nextSteps">Что дальше сделаем</div>
-          <ol class="list">
-            <li data-i18n="ns1">Подключим Supabase Auth (логин/роли) и таблицы</li>
-            <li data-i18n="ns2">Сделаем “Мониторинг” (рынок/сигналы) + задания</li>
-            <li data-i18n="ns3">Импорт клиентской базы (CSV) в таблицы</li>
-            <li data-i18n="ns4">Документы LOI/SPA + хранение файлов</li>
-            <li data-i18n="ns5">Реферальные ссылки + статистика</li>
-          </ol>
-        </div>
-      </div>
-
-      <!-- LEADS -->
-      <div class="page hidden" id="page-leads">
-        <div class="card wide">
-          <div class="row">
-            <div>
-              <div class="cardTitle" data-i18n="leadsTitle">Лиды</div>
-              <div class="muted" data-i18n="leadsSub">Быстрый ручной ввод (временно). Потом будет база Supabase.</div>
-            </div>
-            <button class="btnPrimary" id="addLeadBtn" type="button">
-              <span data-i18n="addLead">Добавить лид</span>
-            </button>
+        <section class="page" data-page="dashboard">
+          <div class="card">
+            <h2 id="dashTitle">Обзор</h2>
+            <p class="muted">
+              Это бесплатная CRM-демо под dolomitpulse.ai. Данные сохраняются в браузере (localStorage).
+              Следующий шаг — подключить Supabase, чтобы было “по-настоящему” (пользователи, база, файлы).
+            </p>
           </div>
-
-          <div class="tableWrap">
-            <table class="table" id="leadsTable">
-              <thead>
-                <tr>
-                  <th data-i18n="tCompany">Компания</th>
-                  <th data-i18n="tCountry">Страна</th>
-                  <th data-i18n="tNeed">Запрос</th>
-                  <th data-i18n="tStatus">Статус</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- MONITORING -->
-      <div class="page hidden" id="page-monitoring">
-        <div class="card wide">
-          <div class="cardTitle" data-i18n="monTitle">Мониторинг рынка</div>
-          <div class="muted" data-i18n="monSub">Пока это демо. Дальше подключим реальные источники и расписание задач.</div>
 
           <div class="grid2">
-            <div class="box">
-              <div class="boxTitle" data-i18n="monSignals">Сигналы</div>
-              <div class="boxText" data-i18n="monSignalsText">“Ищу доломит / готов купить / готов продать”</div>
+            <div class="card">
+              <h3>Что умеет сейчас</h3>
+              <ul class="list">
+                <li>Роли: покупатель / поставщик / реф.партнёр / админ</li>
+                <li>Сделки + смена этапов (клик по строке)</li>
+                <li>Контакты + импорт CSV</li>
+                <li>Документы (заголовки/типы — демо)</li>
+                <li>Реферальные ссылки + демо-статистика</li>
+                <li>Мониторинг сигналов рынка (демо)</li>
+                <li>AI-шаблоны сообщений (без внешнего ИИ)</li>
+                <li>Геймификация: очки и уровни</li>
+              </ul>
             </div>
-            <div class="box">
-              <div class="boxTitle" data-i18n="monTasks">Задания</div>
-              <div class="boxText" data-i18n="monTasksText">Ежедневные проверки + отчёт</div>
+
+            <div class="card">
+              <h3>Как проверить быстро</h3>
+              <ul class="list">
+                <li>Выбери язык вверху — меню сразу поменяется</li>
+                <li>Зайди в “Контакты” → “Загрузить базу (CSV)”</li>
+                <li>Зайди в “Рефералы” → “Сгенерировать ссылку”</li>
+                <li>Зайди в “Сделки” → клик по сделке меняет этап</li>
+              </ul>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- CLIENTS -->
-      <div class="page hidden" id="page-clients">
-        <div class="card wide">
-          <div class="row">
+        <section class="page hidden" data-page="deals">
+          <div class="row between">
+            <h2 id="dealsTitle">Сделки</h2>
+            <button id="btnNewDeal" class="btn">Создать сделку</button>
+          </div>
+          <div id="dealsList" class="mt"></div>
+          <p class="muted mtSmall">Подсказка: клик по сделке — меняет этап (Лид → Переписка → Документы → Сделка).</p>
+        </section>
+
+        <section class="page hidden" data-page="contacts">
+          <div class="row between">
+            <h2 id="contactsTitle">Контакты</h2>
+            <div class="row gap">
+              <input id="fileInput" type="file" accept=".csv" class="hidden" />
+              <button id="btnUpload" class="btn ghost">Загрузить базу (CSV)</button>
+              <button id="btnNewContact" class="btn">Добавить контакт</button>
+            </div>
+          </div>
+          <div id="csvHint" class="muted mtSmall"></div>
+          <div id="contactsList" class="mt"></div>
+        </section>
+
+        <section class="page hidden" data-page="docs">
+          <div class="row between">
+            <h2 id="docsTitle">Документы</h2>
+            <button id="btnAddDoc" class="btn">Добавить документ</button>
+          </div>
+          <div id="docsList" class="grid3 mt"></div>
+          <p class="muted mtSmall">Сейчас “документы” — демо карточки. Дальше подключим Supabase Storage для реальных файлов.</p>
+        </section>
+
+        <section class="page hidden" data-page="ref">
+          <div class="row between">
+            <h2 id="refTitle">Рефералы</h2>
+            <button id="btnGenLink" class="btn">Сгенерировать ссылку</button>
+          </div>
+          <div id="refList" class="grid2 mt"></div>
+          <p class="muted mtSmall">Кнопка “Simulate +” — имитирует клики/лиды/сделки (демо).</p>
+        </section>
+
+        <section class="page hidden" data-page="monitoring">
+          <div class="row between">
             <div>
-              <div class="cardTitle" data-i18n="clientsTitle">Клиентская база</div>
-              <div class="muted" data-i18n="clientsSub">Импорт CSV будет на следующем этапе.</div>
+              <h2 id="monTitle">Мониторинг</h2>
+              <div id="monHint" class="muted"></div>
             </div>
-            <label class="btnFile">
-              <input id="csvInput" type="file" accept=".csv" />
-              <span data-i18n="importCsv">Импорт CSV</span>
-            </label>
+            <button id="btnAddSignal" class="btn ghost">+ Signal</button>
           </div>
+          <div id="monList" class="grid2 mt"></div>
+        </section>
 
-          <div class="tableWrap">
-            <table class="table" id="clientsTable">
-              <thead>
-                <tr>
-                  <th data-i18n="tName">Имя</th>
-                  <th data-i18n="tEmail">Email</th>
-                  <th data-i18n="tPhone">Телефон</th>
-                  <th data-i18n="tNotes">Заметки</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+        <section class="page hidden" data-page="ai">
+          <div class="card">
+            <div class="row between">
+              <div>
+                <h2 id="aiTitle">AI-переписка</h2>
+                <div id="aiHint" class="muted"></div>
+              </div>
+              <select id="tplSelect" class="select"></select>
+            </div>
+
+            <div class="mt">
+              <textarea id="aiText" class="textarea" rows="10"></textarea>
+            </div>
+
+            <div class="row right mt">
+              <button id="btnSend" class="btn">Отправить</button>
+            </div>
+
+            <p class="muted mtSmall">
+              Это пока шаблоны (без внешнего ИИ). Следующий этап: подключим бесплатный open-source LLM (через API провайдера),
+              или сделаем простого “помощника” на правилах/шаблонах под доломит.
+            </p>
           </div>
-        </div>
+        </section>
+
+        <section class="page hidden" data-page="settings">
+          <div class="card">
+            <h2 id="settingsTitle">Настройки проекта</h2>
+            <p class="muted">
+              Сейчас проект работает без сервера. После подключения Supabase появятся: логины, права доступа, реальная база, файлы.
+            </p>
+            <div class="row gap mt">
+              <button id="btnReset" class="btn ghost">Reset demo data</button>
+            </div>
+          </div>
+        </section>
+
       </div>
-
-      <!-- CHAT -->
-      <div class="page hidden" id="page-chat">
-        <div class="card wide">
-          <div class="cardTitle" data-i18n="chatTitle">AI-чат (шаблоны)</div>
-          <div class="muted" data-i18n="chatSub">Позже подключим открытый LLM (локально/сервер) и историю диалогов.</div>
-
-          <div class="chat">
-            <div class="chatMsgs" id="chatMsgs"></div>
-            <div class="chatBar">
-              <select id="tplSelect" class="select">
-                <option value="intro" data-i18n="tplIntro">Шаблон: первое сообщение</option>
-                <option value="price" data-i18n="tplPrice">Шаблон: запрос цены</option>
-                <option value="docs" data-i18n="tplDocs">Шаблон: запрос документов</option>
-              </select>
-              <input id="chatInput" class="input" placeholder="..." />
-              <button id="chatSend" class="btnPrimary" type="button" data-i18n="send">Отправить</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DOCS -->
-      <div class="page hidden" id="page-docs">
-        <div class="card wide">
-          <div class="row">
-            <div>
-              <div class="cardTitle" data-i18n="docsTitle">Документы</div>
-              <div class="muted" data-i18n="docsSub">LOI/SPA и любые файлы. Сейчас демо, потом Storage Supabase.</div>
-            </div>
-            <label class="btnFile">
-              <input id="docInput" type="file" />
-              <span data-i18n="uploadDoc">Загрузить файл</span>
-            </label>
-          </div>
-
-          <ul class="fileList" id="fileList"></ul>
-        </div>
-      </div>
-
-      <!-- REFERRALS -->
-      <div class="page hidden" id="page-referrals">
-        <div class="card wide">
-          <div class="row">
-            <div>
-              <div class="cardTitle" data-i18n="refTitle">Реферальные партнёры</div>
-              <div class="muted" data-i18n="refSub">Генерация ссылок + мониторинг переходов (пока локально).</div>
-            </div>
-            <button class="btnPrimary" id="genRefBtn" type="button" data-i18n="genLink">Сгенерировать ссылку</button>
-          </div>
-
-          <div class="refBox">
-            <div class="muted" data-i18n="yourLink">Ваша ссылка:</div>
-            <div class="mono" id="refLink">—</div>
-          </div>
-
-          <div class="grid3">
-            <div class="stat">
-              <div class="statLabel" data-i18n="refClicks">Переходы</div>
-              <div class="statValue" id="refClicks">0</div>
-            </div>
-            <div class="stat">
-              <div class="statLabel" data-i18n="refRegs">Регистрации</div>
-              <div class="statValue" id="refRegs">0</div>
-            </div>
-            <div class="stat">
-              <div class="statLabel" data-i18n="refDeals">Сделки</div>
-              <div class="statValue" id="refDeals">0</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SETTINGS -->
-      <div class="page hidden" id="page-settings">
-        <div class="card wide">
-          <div class="cardTitle" data-i18n="settingsTitle">Настройки бренда</div>
-          <div class="grid2">
-            <div class="field">
-              <label data-i18n="setName">Название</label>
-              <input id="setName" class="input" value="dolomitpulse.ai" />
-            </div>
-            <div class="field">
-              <label data-i18n="setAccent">Акцентный цвет</label>
-              <input id="setAccent" class="input" value="#f6c445" />
-            </div>
-          </div>
-          <button class="btnPrimary" id="saveBrandBtn" type="button" data-i18n="save">Сохранить</button>
-        </div>
-      </div>
-
     </section>
   </main>
 
+  <div id="toast" class="toast"></div>
+
   <script src="app.js"></script>
 </body>
-  </html>
+</html>
